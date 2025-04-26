@@ -217,24 +217,39 @@ export function CryptoProvider({ children }: { children: React.ReactNode }) {
       )
     );
 
-    // If this is a buy transaction, update the user's wallet balance
+    // Find the transaction
     const transaction = transactions.find(t => t.id === transactionId);
-    if (transaction && transaction.type === 'buy' && transaction.userId) {
-      const storedUsers = JSON.parse(localStorage.getItem('registeredUsers') || '[]');
-      const userIndex = storedUsers.findIndex((u: any) => u.id === transaction.userId);
+    if (!transaction || !transaction.userId) return;
+    
+    // Get users from localStorage
+    const storedUsers = JSON.parse(localStorage.getItem('registeredUsers') || '[]');
+    const userIndex = storedUsers.findIndex((u: any) => u.id === transaction.userId);
+    
+    if (userIndex !== -1) {
+      const updatedUsers = [...storedUsers];
       
-      if (userIndex !== -1) {
-        const updatedUsers = [...storedUsers];
-        // For buys, we would be adding the crypto amount, but for simplicity we'll just add the fiat value
-        updatedUsers[userIndex].walletBalance = (updatedUsers[userIndex].walletBalance || 0) + transaction.cryptoAmount;
-        localStorage.setItem('registeredUsers', JSON.stringify(updatedUsers));
-        
-        // Also update the current user if they're logged in
-        const currentUser = JSON.parse(localStorage.getItem('cryptoUser') || '{}');
-        if (currentUser.id === transaction.userId) {
-          currentUser.walletBalance = (currentUser.walletBalance || 0) + transaction.cryptoAmount;
-          localStorage.setItem('cryptoUser', JSON.stringify(currentUser));
+      // Handle different transaction types
+      if (transaction.type === 'deposit') {
+        // For deposits, add the full amount to wallet
+        updatedUsers[userIndex].walletBalance = (updatedUsers[userIndex].walletBalance || 0) + transaction.amount;
+      } 
+      else if (transaction.type === 'buy') {
+        // For crypto purchases, add the crypto value minus 14% commission
+        const cryptoValue = transaction.amount * 0.86; // Apply 14% commission
+        updatedUsers[userIndex].walletBalance = (updatedUsers[userIndex].walletBalance || 0) + cryptoValue;
+      }
+      
+      localStorage.setItem('registeredUsers', JSON.stringify(updatedUsers));
+      
+      // Also update the current user if they're logged in
+      const currentUser = JSON.parse(localStorage.getItem('cryptoUser') || '{}');
+      if (currentUser.id === transaction.userId) {
+        if (transaction.type === 'deposit') {
+          currentUser.walletBalance = (currentUser.walletBalance || 0) + transaction.amount;
+        } else if (transaction.type === 'buy') {
+          currentUser.walletBalance = (currentUser.walletBalance || 0) + transaction.amount * 0.86; // 14% commission
         }
+        localStorage.setItem('cryptoUser', JSON.stringify(currentUser));
       }
     }
   };
