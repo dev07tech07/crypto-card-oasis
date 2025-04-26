@@ -39,6 +39,11 @@ const PendingTransactionPage: React.FC = () => {
     }
   ];
   
+  // Default values if state is missing
+  const displayAmount = amount || 0;
+  const displayCryptoAmount = cryptoAmount !== undefined ? cryptoAmount : 0;
+  const displayCryptoId = cryptoId || 'BTC';
+
   return (
     <div className="container mx-auto px-4 py-8">
       <Button 
@@ -76,12 +81,12 @@ const PendingTransactionPage: React.FC = () => {
                 
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Amount</span>
-                  <span>${amount}</span>
+                  <span>${displayAmount}</span>
                 </div>
                 
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">You will receive</span>
-                  <span>{cryptoAmount.toFixed(8)} {cryptoId.toUpperCase()}</span>
+                  <span>{displayCryptoAmount.toFixed(8)} {displayCryptoId.toUpperCase()}</span>
                 </div>
                 
                 <div className="flex justify-between">
