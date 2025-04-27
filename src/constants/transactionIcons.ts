@@ -1,7 +1,16 @@
 
 import { CreditCard, Wallet, ArrowDown, ArrowUp } from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
 
-export const TRANSACTION_ICONS = {
+export type TransactionType = 'buy' | 'sell' | 'deposit' | 'withdrawal';
+
+export interface TransactionIconData {
+  icon: LucideIcon;
+  bgColor: string;
+  textColor: string;
+}
+
+export const TRANSACTION_ICONS: Record<TransactionType | 'default', TransactionIconData> = {
   buy: {
     icon: CreditCard,
     bgColor: 'bg-crypto-accent/10',
@@ -28,3 +37,4 @@ export const TRANSACTION_ICONS = {
     textColor: 'text-purple-500'
   }
 };
+
