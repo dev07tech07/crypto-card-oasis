@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Transaction } from '@/contexts/CryptoContext';
+import type { Transaction } from '@/types/crypto';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
