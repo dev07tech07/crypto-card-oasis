@@ -59,31 +59,50 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       return true;
     }
     
-    // Mock user login - in a real app, this would be an API call
+    // User login - check localStorage for registered users
     if (email && password) {
-      // Check if this is a registered user in localStorage
-      const registeredUsers = JSON.parse(localStorage.getItem('registeredUsers') || '[]');
-      const foundUser = registeredUsers.find((u: any) => u.email === email);
-      
-      if (foundUser && foundUser.password === password) {
-        const userData: User = {
-          id: foundUser.id,
-          email: foundUser.email,
-          name: foundUser.name,
-          role: 'user',
-          walletBalance: foundUser.walletBalance || 0
-        };
-        setUser(userData);
-        localStorage.setItem('cryptoUser', JSON.stringify(userData));
+      try {
+        // Get registered users from localStorage
+        const storedUsers = localStorage.getItem('registeredUsers');
+        const registeredUsers = storedUsers ? JSON.parse(storedUsers) : [];
+        
+        // Find user by email (case insensitive)
+        const foundUser = registeredUsers.find((u: any) => 
+          u.email.toLowerCase() === email.toLowerCase()
+        );
+        
+        if (foundUser && foundUser.password === password) {
+          // Create user object without password
+          const userData: User = {
+            id: foundUser.id,
+            email: foundUser.email,
+            name: foundUser.name,
+            role: 'user',
+            walletBalance: foundUser.walletBalance || 0
+          };
+          
+          // Update state and localStorage
+          setUser(userData);
+          localStorage.setItem('cryptoUser', JSON.stringify(userData));
+          
+          toast({
+            title: "Login Successful",
+            description: "Welcome back to CryptoCard Oasis",
+          });
+          return true;
+        } else {
+          toast({
+            title: "Login Failed",
+            description: "Invalid email or password",
+            variant: "destructive"
+          });
+          return false;
+        }
+      } catch (error) {
+        console.error('Error during login:', error);
         toast({
-          title: "Login Successful",
-          description: "Welcome back to CryptoCard Oasis",
-        });
-        return true;
-      } else {
-        toast({
-          title: "Login Failed",
-          description: "Invalid email or password",
+          title: "Login Error",
+          description: "An unexpected error occurred",
           variant: "destructive"
         });
         return false;
@@ -95,45 +114,60 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const register = async (name: string, email: string, password: string): Promise<boolean> => {
     // Mock user registration - in a real app, this would be an API call
     if (name && email && password) {
-      // Check if user already exists
-      const registeredUsers = JSON.parse(localStorage.getItem('registeredUsers') || '[]');
-      if (registeredUsers.some((u: any) => u.email === email)) {
+      try {
+        // Check if user already exists (case insensitive)
+        const storedUsers = localStorage.getItem('registeredUsers');
+        const registeredUsers = storedUsers ? JSON.parse(storedUsers) : [];
+        
+        if (registeredUsers.some((u: any) => u.email.toLowerCase() === email.toLowerCase())) {
+          toast({
+            title: "Registration Failed",
+            description: "Email already exists",
+            variant: "destructive"
+          });
+          return false;
+        }
+
+        const newUser = {
+          id: `user-${Date.now()}`,
+          email,
+          name,
+          password, // In a real app, this would be hashed
+          role: 'user',
+          walletBalance: 0
+        };
+
+        // Save new user to localStorage
+        registeredUsers.push(newUser);
+        localStorage.setItem('registeredUsers', JSON.stringify(registeredUsers));
+
+        // Prepare user object for state (without password)
+        const userData: User = {
+          id: newUser.id,
+          email: newUser.email,
+          name: newUser.name,
+          role: 'user' as const,
+          walletBalance: newUser.walletBalance
+        };
+
+        // Update state and localStorage
+        setUser(userData);
+        localStorage.setItem('cryptoUser', JSON.stringify(userData));
+        
         toast({
-          title: "Registration Failed",
-          description: "Email already exists",
+          title: "Registration Successful",
+          description: "Welcome to CryptoCard Oasis",
+        });
+        return true;
+      } catch (error) {
+        console.error('Error during registration:', error);
+        toast({
+          title: "Registration Error",
+          description: "An unexpected error occurred",
           variant: "destructive"
         });
         return false;
       }
-
-      const newUser = {
-        id: `user-${Date.now()}`,
-        email,
-        name,
-        password, // In a real app, this would be hashed
-        role: 'user',
-        walletBalance: 0
-      };
-
-      registeredUsers.push(newUser);
-      localStorage.setItem('registeredUsers', JSON.stringify(registeredUsers));
-
-      const userData: User = {
-        id: newUser.id,
-        email: newUser.email,
-        name: newUser.name,
-        role: 'user' as const,
-        walletBalance: newUser.walletBalance
-      };
-
-      setUser(userData);
-      localStorage.setItem('cryptoUser', JSON.stringify(userData));
-      
-      toast({
-        title: "Registration Successful",
-        description: "Welcome to CryptoCard Oasis",
-      });
-      return true;
     }
     return false;
   };
