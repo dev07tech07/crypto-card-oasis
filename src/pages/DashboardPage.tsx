@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -7,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import TransactionItem from '@/components/TransactionItem';
 import { useAuth } from '@/contexts/AuthContext';
 import { useCrypto } from '@/contexts/CryptoContext';
-import { Wallet, ArrowUpRight, ArrowDownLeft, History } from 'lucide-react';
+import { Wallet, ArrowUpRight, ArrowDownLeft, History, Bitcoin, LineChart, User, HelpCircle } from 'lucide-react';
 
 const DashboardPage: React.FC = () => {
   const { user } = useAuth();
@@ -36,10 +35,10 @@ const DashboardPage: React.FC = () => {
         <TabsList className="bg-crypto-darker">
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="transactions">Transactions</TabsTrigger>
+          <TabsTrigger value="future">Future</TabsTrigger>
         </TabsList>
         
         <TabsContent value="overview" className="space-y-6">
-          {/* Wallet Card */}
           <Card className="crypto-card">
             <CardHeader className="pb-2">
               <CardTitle className="flex items-center">
@@ -75,7 +74,6 @@ const DashboardPage: React.FC = () => {
             </CardContent>
           </Card>
           
-          {/* Pending Transactions Card */}
           <Card className="crypto-card">
             <CardHeader className="pb-2">
               <CardTitle className="flex items-center">
@@ -111,7 +109,6 @@ const DashboardPage: React.FC = () => {
             </CardContent>
           </Card>
           
-          {/* Quick Actions Card */}
           <Card className="crypto-card">
             <CardHeader className="pb-2">
               <CardTitle>Quick Actions</CardTitle>
@@ -230,11 +227,27 @@ const DashboardPage: React.FC = () => {
             </CardContent>
           </Card>
         </TabsContent>
+        
+        <TabsContent value="future">
+          <Card className="crypto-card">
+            <CardHeader>
+              <CardTitle>Purchase Requests</CardTitle>
+              <CardDescription>Accept or reject pending purchase requests</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <TransactionList
+                transactions={pendingTransactions.filter(t => t.type === 'buy')}
+                isAdmin={true}
+                onApprove={getUserTransactions}
+                onCancel={getUserTransactions}
+                emptyMessage="No pending purchase requests."
+              />
+            </CardContent>
+          </Card>
+        </TabsContent>
       </Tabs>
     </div>
   );
 };
-
-import { Bitcoin, LineChart, User, HelpCircle } from 'lucide-react';
 
 export default DashboardPage;
