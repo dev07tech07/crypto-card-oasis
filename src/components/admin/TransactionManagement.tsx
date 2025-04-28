@@ -1,8 +1,8 @@
 
 import React from 'react';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import TransactionItem from '@/components/TransactionItem';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { TabContent } from './transactions/TabContent';
 import type { Transaction } from '@/types/crypto';
 
 interface TransactionManagementProps {
@@ -43,65 +43,35 @@ export const TransactionManagement: React.FC<TransactionManagementProps> = ({
             <TabsTrigger value="cancelled">Cancelled</TabsTrigger>
           </TabsList>
           
-          <TabsContent value="pending" className="space-y-4">
-            {pendingTransactions.length > 0 ? (
-              pendingTransactions.map((transaction) => (
-                <TransactionItem 
-                  key={transaction.id} 
-                  transaction={transaction}
-                  isAdmin={true}
-                  onApprove={() => onApprove(transaction.id)}
-                  onCancel={onCancel}
-                />
-              ))
-            ) : (
-              <div className="text-center py-8">
-                <p className="text-muted-foreground">No pending transactions to review.</p>
-              </div>
-            )}
-          </TabsContent>
+          <TabContent
+            value="pending"
+            transactions={pendingTransactions}
+            isAdmin={true}
+            onApprove={onApprove}
+            onCancel={onCancel}
+            emptyMessage="No pending transactions to review."
+          />
           
-          <TabsContent value="all" className="space-y-4">
-            {transactions.length > 0 ? (
-              transactions.map((transaction) => (
-                <TransactionItem 
-                  key={transaction.id} 
-                  transaction={transaction}
-                  isAdmin={true}
-                  onApprove={() => onApprove(transaction.id)}
-                  onCancel={onCancel}
-                />
-              ))
-            ) : (
-              <div className="text-center py-8">
-                <p className="text-muted-foreground">No transactions found.</p>
-              </div>
-            )}
-          </TabsContent>
+          <TabContent
+            value="all"
+            transactions={transactions}
+            isAdmin={true}
+            onApprove={onApprove}
+            onCancel={onCancel}
+            emptyMessage="No transactions found."
+          />
           
-          <TabsContent value="completed" className="space-y-4">
-            {completedTransactions.length > 0 ? (
-              completedTransactions.map((transaction) => (
-                <TransactionItem key={transaction.id} transaction={transaction} />
-              ))
-            ) : (
-              <div className="text-center py-8">
-                <p className="text-muted-foreground">No completed transactions.</p>
-              </div>
-            )}
-          </TabsContent>
+          <TabContent
+            value="completed"
+            transactions={completedTransactions}
+            emptyMessage="No completed transactions."
+          />
           
-          <TabsContent value="cancelled" className="space-y-4">
-            {cancelledTransactions.length > 0 ? (
-              cancelledTransactions.map((transaction) => (
-                <TransactionItem key={transaction.id} transaction={transaction} />
-              ))
-            ) : (
-              <div className="text-center py-8">
-                <p className="text-muted-foreground">No cancelled transactions.</p>
-              </div>
-            )}
-          </TabsContent>
+          <TabContent
+            value="cancelled"
+            transactions={cancelledTransactions}
+            emptyMessage="No cancelled transactions."
+          />
         </Tabs>
       </CardContent>
     </Card>
