@@ -1,9 +1,10 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Badge } from '@/components/ui/badge';
 import TransactionItem from '@/components/TransactionItem';
 import { useAuth } from '@/contexts/AuthContext';
 import { useCrypto } from '@/contexts/CryptoContext';
@@ -16,6 +17,7 @@ const AdminPage: React.FC = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [lastApprovedTransaction, setLastApprovedTransaction] = useState<any>(null);
+  const [notifiedTransactions, setNotifiedTransactions] = useState<string[]>([]);
   
   // Redirect if not admin
   React.useEffect(() => {
@@ -23,6 +25,41 @@ const AdminPage: React.FC = () => {
       navigate('/login');
     }
   }, [user, isAdmin, navigate]);
+  
+  // Check for new pending transactions and show notifications
+  useEffect(() => {
+    // Only run if user is admin and there are pending transactions
+    if (user && isAdmin && pendingTransactions.length > 0) {
+      // Filter out transactions we've already notified about
+      const newTransactions = pendingTransactions.filter(
+        transaction => !notifiedTransactions.includes(transaction.id)
+      );
+      
+      // Show notification for each new transaction
+      if (newTransactions.length > 0) {
+        if (newTransactions.length === 1) {
+          const transaction = newTransactions[0];
+          toast({
+            title: "New Transaction Pending",
+            description: `${transaction.type.charAt(0).toUpperCase() + transaction.type.slice(1)} transaction of $${transaction.amount.toLocaleString()} requires your approval.`,
+            variant: "default",
+          });
+        } else {
+          toast({
+            title: "New Transactions Pending",
+            description: `${newTransactions.length} new transactions require your approval.`,
+            variant: "default",
+          });
+        }
+        
+        // Add these transactions to our notified list
+        setNotifiedTransactions(prev => [
+          ...prev,
+          ...newTransactions.map(transaction => transaction.id)
+        ]);
+      }
+    }
+  }, [pendingTransactions, user, isAdmin, notifiedTransactions, toast]);
   
   if (!user || !isAdmin) {
     return null;
@@ -50,7 +87,7 @@ const AdminPage: React.FC = () => {
       toast({
         title: "Transaction Approved",
         description: `${transaction.type.charAt(0).toUpperCase() + transaction.type.slice(1)} transaction of $${transaction.amount.toLocaleString()} has been approved.`,
-        variant: "success",
+        variant: "default",
       });
     }
   };
