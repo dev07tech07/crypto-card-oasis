@@ -9,6 +9,7 @@ interface TransactionListProps {
   onApprove?: (id: string) => void;
   onCancel?: (id: string, reason: string) => void;
   emptyMessage: string;
+  newCurrencies?: Record<string, boolean>;
 }
 
 export const TransactionList: React.FC<TransactionListProps> = ({
@@ -16,7 +17,8 @@ export const TransactionList: React.FC<TransactionListProps> = ({
   isAdmin = false,
   onApprove,
   onCancel,
-  emptyMessage
+  emptyMessage,
+  newCurrencies = {}
 }) => {
   if (transactions.length === 0) {
     return (
@@ -35,6 +37,7 @@ export const TransactionList: React.FC<TransactionListProps> = ({
           isAdmin={isAdmin}
           onApprove={onApprove}
           onCancel={onCancel}
+          isNewCurrency={transaction.cryptoSymbol ? newCurrencies[transaction.cryptoSymbol] : false}
         />
       ))}
     </div>

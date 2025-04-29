@@ -16,13 +16,15 @@ interface TransactionItemProps {
   isAdmin?: boolean;
   onApprove?: (id: string) => void;
   onCancel?: (id: string, reason: string) => void;
+  isNewCurrency?: boolean;
 }
 
 const TransactionItem: React.FC<TransactionItemProps> = ({ 
   transaction, 
   isAdmin = false,
   onApprove,
-  onCancel
+  onCancel,
+  isNewCurrency = false
 }) => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [cancellationReason, setCancellationReason] = useState('');
@@ -72,9 +74,17 @@ const TransactionItem: React.FC<TransactionItemProps> = ({
         <CardContent className="p-4">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
             <div className="flex items-center">
-              <TransactionIcon type={transaction.type} />
+              <TransactionIcon 
+                type={transaction.type} 
+                showNotification={isNewCurrency}
+              />
               <div>
-                <h3 className="font-medium">{getTransactionTitle()}</h3>
+                <h3 className="font-medium">
+                  {getTransactionTitle()}
+                  {isNewCurrency && (
+                    <span className="inline-block ml-2 px-1 py-0.5 bg-[#FEF7CD] text-yellow-800 text-xs rounded">New</span>
+                  )}
+                </h3>
                 <p className="text-xs text-muted-foreground">{formatDate(transaction.date)}</p>
               </div>
             </div>
