@@ -7,6 +7,7 @@ import TransactionItem from '@/components/TransactionItem';
 import { useAuth } from '@/contexts/AuthContext';
 import { useCrypto } from '@/contexts/CryptoContext';
 import { Wallet, ArrowUpRight, ArrowDownLeft, History, Bitcoin, LineChart, User, HelpCircle } from 'lucide-react';
+import { TransactionList } from '@/components/admin/transactions/TransactionList';
 
 const DashboardPage: React.FC = () => {
   const { user } = useAuth();
