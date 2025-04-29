@@ -48,6 +48,15 @@ const CryptoCard: React.FC<CryptoCardProps> = ({ crypto, onBuy }) => {
     }
   };
 
+  // Special handling for stablecoins to display appropriate price change colors
+  const isStablecoin = crypto.symbol === 'USDT' || crypto.symbol === 'USDC';
+  const getPriceChangeClass = (percentage: number) => {
+    if (isStablecoin && Math.abs(percentage) < 0.1) {
+      return "text-gray-400"; // Neutral color for minimal changes in stablecoins
+    }
+    return percentage > 0 ? "text-crypto-green" : "text-crypto-red";
+  };
+
   return (
     <div className="group">
       <Card className="crypto-card overflow-hidden hover:shadow-md hover:shadow-crypto-accent/5 transition-all duration-300">
@@ -89,7 +98,7 @@ const CryptoCard: React.FC<CryptoCardProps> = ({ crypto, onBuy }) => {
               <p className="text-xs text-muted-foreground">1h</p>
               <p className={cn(
                 "text-sm font-medium",
-                crypto.priceChange1h > 0 ? "text-crypto-green" : "text-crypto-red"
+                getPriceChangeClass(crypto.priceChange1h)
               )}>
                 {formatPercentage(crypto.priceChange1h)}
               </p>
@@ -98,7 +107,7 @@ const CryptoCard: React.FC<CryptoCardProps> = ({ crypto, onBuy }) => {
               <p className="text-xs text-muted-foreground">24h</p>
               <p className={cn(
                 "text-sm font-medium",
-                crypto.priceChange24h > 0 ? "text-crypto-green" : "text-crypto-red"
+                getPriceChangeClass(crypto.priceChange24h)
               )}>
                 {formatPercentage(crypto.priceChange24h)}
               </p>
@@ -107,7 +116,7 @@ const CryptoCard: React.FC<CryptoCardProps> = ({ crypto, onBuy }) => {
               <p className="text-xs text-muted-foreground">7d</p>
               <p className={cn(
                 "text-sm font-medium",
-                crypto.priceChange7d > 0 ? "text-crypto-green" : "text-crypto-red"
+                getPriceChangeClass(crypto.priceChange7d)
               )}>
                 {formatPercentage(crypto.priceChange7d)}
               </p>

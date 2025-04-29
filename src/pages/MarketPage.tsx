@@ -42,6 +42,9 @@ const MarketPage: React.FC = () => {
   // Get watchlist cryptos
   const watchlistCryptos = filteredCryptos.filter(crypto => watchlist.includes(crypto.id));
   
+  // This ensures we're logging what cryptocurrencies are available
+  console.log('Available cryptocurrencies:', cryptocurrencies.map(crypto => `${crypto.name} (${crypto.symbol})`));
+  
   return (
     <div className="container mx-auto px-4 pb-12">
       <div className="pt-8 pb-6">
@@ -73,6 +76,7 @@ const MarketPage: React.FC = () => {
               <TabsTrigger value="all">All</TabsTrigger>
               <TabsTrigger value="gainers">Gainers</TabsTrigger>
               <TabsTrigger value="losers">Losers</TabsTrigger>
+              <TabsTrigger value="stablecoins">Stablecoins</TabsTrigger>
               <TabsTrigger value="watchlist" disabled={watchlist.length === 0}>
                 Watchlist {watchlist.length > 0 && `(${watchlist.length})`}
               </TabsTrigger>
@@ -150,6 +154,34 @@ const MarketPage: React.FC = () => {
                   ) : (
                     <div className="text-center py-8">
                       <p className="text-muted-foreground">No losers found.</p>
+                    </div>
+                  )}
+                </>
+              )}
+            </TabsContent>
+            
+            <TabsContent value="stablecoins" className="mt-0">
+              {loading ? (
+                <div className="py-8 text-center">
+                  <p className="animate-pulse text-muted-foreground">Loading stablecoins...</p>
+                </div>
+              ) : (
+                <>
+                  {filteredCryptos.filter(crypto => crypto.symbol === 'USDT' || crypto.symbol === 'USDC').length > 0 ? (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                      {filteredCryptos
+                        .filter(crypto => crypto.symbol === 'USDT' || crypto.symbol === 'USDC')
+                        .map((crypto) => (
+                          <CryptoCard 
+                            key={crypto.id} 
+                            crypto={crypto} 
+                            onBuy={() => handleBuyCrypto(crypto.id)} 
+                          />
+                        ))}
+                    </div>
+                  ) : (
+                    <div className="text-center py-8">
+                      <p className="text-muted-foreground">No stablecoins found.</p>
                     </div>
                   )}
                 </>
