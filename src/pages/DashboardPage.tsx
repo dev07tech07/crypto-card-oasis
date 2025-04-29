@@ -11,7 +11,7 @@ import { TransactionList } from '@/components/admin/transactions/TransactionList
 
 const DashboardPage: React.FC = () => {
   const { user } = useAuth();
-  const { getUserTransactions } = useCrypto();
+  const { getUserTransactions, approveTransaction, cancelTransaction } = useCrypto();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('overview');
 
@@ -24,6 +24,18 @@ const DashboardPage: React.FC = () => {
   const pendingTransactions = userTransactions.filter(t => t.status === 'pending');
   const completedTransactions = userTransactions.filter(t => t.status === 'completed');
   const cancelledTransactions = userTransactions.filter(t => t.status === 'cancelled');
+
+  const handleApproveTransaction = (transactionId: string) => {
+    approveTransaction(transactionId);
+    // Refresh the user transactions after approval
+    getUserTransactions(user.id);
+  };
+
+  const handleCancelTransaction = (transactionId: string, reason: string) => {
+    cancelTransaction(transactionId, reason);
+    // Refresh the user transactions after cancellation
+    getUserTransactions(user.id);
+  };
 
   return (
     <div className="container mx-auto px-4 pb-12">
@@ -239,8 +251,8 @@ const DashboardPage: React.FC = () => {
               <TransactionList
                 transactions={pendingTransactions.filter(t => t.type === 'buy')}
                 isAdmin={true}
-                onApprove={getUserTransactions}
-                onCancel={getUserTransactions}
+                onApprove={handleApproveTransaction}
+                onCancel={handleCancelTransaction}
                 emptyMessage="No pending purchase requests."
               />
             </CardContent>
