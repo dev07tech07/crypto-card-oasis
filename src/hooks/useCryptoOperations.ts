@@ -55,7 +55,7 @@ export const useCryptoOperations = () => {
               priceChange7d: 4.5,
               volume24h: 45000000000,
               marketCap: 1800000000000,
-              image: '/lovable-uploads/caa925c0-5fb1-45be-ac96-f03a8ab93361.png'
+              image: 'https://coin-images.coingecko.com/coins/images/1/large/bitcoin.png?1696501400'
             },
             {
               id: 'ethereum',
@@ -68,7 +68,7 @@ export const useCryptoOperations = () => {
               priceChange7d: 3.5,
               volume24h: 28000000000,
               marketCap: 420000000000,
-              image: '/lovable-uploads/caa925c0-5fb1-45be-ac96-f03a8ab93361.png'
+              image: 'https://coin-images.coingecko.com/coins/images/279/large/ethereum.png?1696501628'
             },
             {
               id: 'tether',
@@ -81,7 +81,7 @@ export const useCryptoOperations = () => {
               priceChange7d: 0.1,
               volume24h: 68000000000,
               marketCap: 100000000000,
-              image: '/lovable-uploads/caa925c0-5fb1-45be-ac96-f03a8ab93361.png'
+              image: 'https://coin-images.coingecko.com/coins/images/325/large/Tether.png?1696501661'
             },
             {
               id: 'binancecoin',
@@ -94,7 +94,7 @@ export const useCryptoOperations = () => {
               priceChange7d: 3.7,
               volume24h: 3100000000,
               marketCap: 85000000000,
-              image: '/lovable-uploads/caa925c0-5fb1-45be-ac96-f03a8ab93361.png'
+              image: 'https://coin-images.coingecko.com/coins/images/825/large/bnb-icon2_2x.png?1696501970'
             },
             {
               id: 'xrp',
@@ -107,7 +107,7 @@ export const useCryptoOperations = () => {
               priceChange7d: -0.9,
               volume24h: 2200000000,
               marketCap: 32000000000,
-              image: '/lovable-uploads/caa925c0-5fb1-45be-ac96-f03a8ab93361.png'
+              image: 'https://coin-images.coingecko.com/coins/images/44/large/xrp-symbol-white-128.png?1696501442'
             },
             {
               id: 'cardano',
@@ -120,7 +120,7 @@ export const useCryptoOperations = () => {
               priceChange7d: 2.8,
               volume24h: 630000000,
               marketCap: 16200000000,
-              image: '/lovable-uploads/caa925c0-5fb1-45be-ac96-f03a8ab93361.png'
+              image: 'https://coin-images.coingecko.com/coins/images/975/large/cardano.png?1696502090'
             },
             {
               id: 'solana',
@@ -133,7 +133,46 @@ export const useCryptoOperations = () => {
               priceChange7d: 15.3,
               volume24h: 3500000000,
               marketCap: 64000000000,
-              image: '/lovable-uploads/caa925c0-5fb1-45be-ac96-f03a8ab93361.png'
+              image: 'https://coin-images.coingecko.com/coins/images/4128/large/solana.png?1718769756'
+            },
+            {
+              id: 'dogecoin',
+              rank: 8,
+              name: 'Dogecoin',
+              symbol: 'DOGE',
+              price: 0.179,
+              priceChange1h: 0.4,
+              priceChange24h: 0.7,
+              priceChange7d: 6.9,
+              volume24h: 1120000000,
+              marketCap: 26700000000,
+              image: 'https://coin-images.coingecko.com/coins/images/5/large/dogecoin.png?1696501409'
+            },
+            {
+              id: 'usd-coin',
+              rank: 7,
+              name: 'USDC',
+              symbol: 'USDC',
+              price: 0.9999,
+              priceChange1h: 0.0003,
+              priceChange24h: -0.014,
+              priceChange7d: 0.0007,
+              volume24h: 5330000000,
+              marketCap: 62051000000,
+              image: 'https://coin-images.coingecko.com/coins/images/6319/large/usdc.png?1696506694'
+            },
+            {
+              id: 'tron',
+              rank: 10,
+              name: 'TRON',
+              symbol: 'TRX',
+              price: 0.246,
+              priceChange1h: -0.08,
+              priceChange24h: 0.45,
+              priceChange7d: 0.3,
+              volume24h: 522000000,
+              marketCap: 23356000000,
+              image: 'https://coin-images.coingecko.com/coins/images/1094/large/tron-logo.png?1696502193'
             }
           ];
         }

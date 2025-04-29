@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -53,7 +54,11 @@ const CryptoCard: React.FC<CryptoCardProps> = ({ crypto, onBuy }) => {
         <div className="p-4 flex items-center justify-between">
           <div className="flex items-center space-x-3">
             <div className="h-10 w-10 rounded-full bg-gray-700 flex items-center justify-center overflow-hidden">
-              <span className="text-lg font-bold">{crypto.symbol.charAt(0)}</span>
+              {crypto.image ? (
+                <img src={crypto.image} alt={crypto.name} className="h-10 w-10 object-cover" />
+              ) : (
+                <span className="text-lg font-bold">{crypto.symbol.charAt(0)}</span>
+              )}
             </div>
             <div>
               <h3 className="font-medium">{crypto.name}</h3>
