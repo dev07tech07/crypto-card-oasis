@@ -1,12 +1,14 @@
 
 import { useState, useEffect } from 'react';
 import type { Cryptocurrency, Transaction } from '../types/crypto';
+import { useAuth } from '@/contexts/AuthContext';
 
 export const useCryptoOperations = () => {
   const [cryptocurrencies, setCryptocurrencies] = useState<Cryptocurrency[]>([]);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState(true);
   const [watchlist, setWatchlist] = useState<string[]>([]);
+  const { user } = useAuth();
 
   // Load initial data
   useEffect(() => {
@@ -179,16 +181,9 @@ export const useCryptoOperations = () => {
 
         setCryptocurrencies(realCryptoData);
 
-        // Load saved transactions
-        const savedTransactions = localStorage.getItem('cryptoTransactions');
-        if (savedTransactions) {
-          const parsedTransactions = JSON.parse(savedTransactions).map((t: any) => ({
-            ...t,
-            date: new Date(t.date)
-          }));
-          setTransactions(parsedTransactions);
-        }
-
+        // Load saved transactions - modified to load user-specific transactions
+        loadSavedTransactions();
+        
         // Load watchlist
         const savedWatchlist = localStorage.getItem('cryptoWatchlist');
         if (savedWatchlist) {
@@ -208,11 +203,25 @@ export const useCryptoOperations = () => {
     const refreshInterval = setInterval(loadCryptoData, 120000);
     
     return () => clearInterval(refreshInterval);
-  }, []);
+  }, [user?.id]);
 
-  // Save transactions to localStorage
+  // Helper function to load user-specific transactions
+  const loadSavedTransactions = () => {
+    const savedTransactions = localStorage.getItem('cryptoTransactions');
+    if (savedTransactions) {
+      const allTransactions = JSON.parse(savedTransactions).map((t: any) => ({
+        ...t,
+        date: new Date(t.date)
+      }));
+      setTransactions(allTransactions);
+    }
+  };
+
+  // Save transactions to localStorage with proper user association
   useEffect(() => {
-    localStorage.setItem('cryptoTransactions', JSON.stringify(transactions));
+    if (transactions.length > 0) {
+      localStorage.setItem('cryptoTransactions', JSON.stringify(transactions));
+    }
   }, [transactions]);
 
   // Save watchlist to localStorage

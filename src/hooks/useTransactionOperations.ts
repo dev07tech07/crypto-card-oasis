@@ -1,5 +1,6 @@
 
 import type { Transaction } from '../types/crypto';
+import { toast } from '@/hooks/use-toast';
 
 export const useTransactionOperations = (
   transactions: Transaction[],
@@ -11,17 +12,29 @@ export const useTransactionOperations = (
       id: `txn-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
       date: new Date()
     };
-    setTransactions((prev) => [...prev, transaction]);
+    
+    setTransactions((prev) => {
+      const updatedTransactions = [...prev, transaction];
+      localStorage.setItem('cryptoTransactions', JSON.stringify(updatedTransactions));
+      return updatedTransactions;
+    });
+    
+    toast({
+      title: "Transaction Created",
+      description: "Your transaction has been submitted and is awaiting approval",
+    });
   };
 
   const approveTransaction = (transactionId: string) => {
-    setTransactions((prev) =>
-      prev.map((transaction) =>
+    setTransactions((prev) => {
+      const updatedTransactions = prev.map((transaction) =>
         transaction.id === transactionId
           ? { ...transaction, status: 'completed' }
           : transaction
-      )
-    );
+      );
+      localStorage.setItem('cryptoTransactions', JSON.stringify(updatedTransactions));
+      return updatedTransactions;
+    });
 
     // Find the transaction
     const transaction = transactions.find(t => t.id === transactionId);
@@ -55,16 +68,30 @@ export const useTransactionOperations = (
         localStorage.setItem('cryptoUser', JSON.stringify(currentUser));
       }
     }
+    
+    toast({
+      title: "Transaction Approved",
+      description: "Your transaction has been successfully processed",
+      variant: "default"
+    });
   };
 
   const cancelTransaction = (transactionId: string, reason: string) => {
-    setTransactions((prev) =>
-      prev.map((transaction) =>
+    setTransactions((prev) => {
+      const updatedTransactions = prev.map((transaction) =>
         transaction.id === transactionId
           ? { ...transaction, status: 'cancelled', cancellationReason: reason }
           : transaction
-      )
-    );
+      );
+      localStorage.setItem('cryptoTransactions', JSON.stringify(updatedTransactions));
+      return updatedTransactions;
+    });
+    
+    toast({
+      title: "Transaction Cancelled",
+      description: reason || "Your transaction has been cancelled",
+      variant: "destructive"
+    });
   };
 
   const getUserTransactions = (userId: string) => {
