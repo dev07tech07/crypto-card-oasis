@@ -12,8 +12,11 @@ export function CryptoProvider({ children }: { children: React.ReactNode }) {
     transactions,
     loading,
     watchlist,
+    pendingTransactions,
     setTransactions,
-    setWatchlist
+    setWatchlist,
+    addToWatchlist,
+    removeFromWatchlist
   } = useCryptoOperations();
 
   const {
@@ -22,20 +25,6 @@ export function CryptoProvider({ children }: { children: React.ReactNode }) {
     cancelTransaction,
     getUserTransactions
   } = useTransactionOperations(transactions, setTransactions);
-
-  const pendingTransactions = transactions.filter(
-    (transaction) => transaction.status === 'pending'
-  );
-
-  const addToWatchlist = (cryptoId: string) => {
-    if (!watchlist.includes(cryptoId)) {
-      setWatchlist((prev) => [...prev, cryptoId]);
-    }
-  };
-
-  const removeFromWatchlist = (cryptoId: string) => {
-    setWatchlist((prev) => prev.filter(id => id !== cryptoId));
-  };
 
   const value = {
     cryptocurrencies,
