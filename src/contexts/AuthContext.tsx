@@ -13,10 +13,11 @@ export interface User {
 interface AuthContextType {
   user: User | null;
   loading: boolean;
-  login: (email: string, password: string) => Promise<boolean>;
+  login: (email: string, password: string, rememberMe?: boolean) => Promise<boolean>;
   register: (name: string, email: string, password: string) => Promise<boolean>;
   logout: () => void;
   isAdmin: boolean;
+  savedCredentials: { email: string; password: string } | null;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -24,6 +25,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
+  const [savedCredentials, setSavedCredentials] = useState<{ email: string; password: string } | null>(null);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -37,10 +39,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         localStorage.removeItem('cryptoUser');
       }
     }
+    
+    // Load saved credentials if available
+    const rememberedCredentials = localStorage.getItem('rememberedCredentials');
+    if (rememberedCredentials) {
+      try {
+        setSavedCredentials(JSON.parse(rememberedCredentials));
+      } catch (error) {
+        console.error('Failed to parse saved credentials', error);
+        localStorage.removeItem('rememberedCredentials');
+      }
+    }
+    
     setLoading(false);
   }, []);
 
-  const login = async (email: string, password: string): Promise<boolean> => {
+  const login = async (email: string, password: string, rememberMe = false): Promise<boolean> => {
     // Admin login
     if (email === 'admin@example.com' && password === 'password') {
       const adminUser: User = {
@@ -52,6 +66,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       };
       setUser(adminUser);
       localStorage.setItem('cryptoUser', JSON.stringify(adminUser));
+      
+      // Save credentials if rememberMe is true
+      if (rememberMe) {
+        const credentials = { email, password };
+        localStorage.setItem('rememberedCredentials', JSON.stringify(credentials));
+        setSavedCredentials(credentials);
+      } else {
+        localStorage.removeItem('rememberedCredentials');
+        setSavedCredentials(null);
+      }
+      
       toast({
         title: "Admin Login Successful",
         description: "Welcome to the admin dashboard",
@@ -84,6 +109,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           // Update state and localStorage
           setUser(userData);
           localStorage.setItem('cryptoUser', JSON.stringify(userData));
+          
+          // Save credentials if rememberMe is true
+          if (rememberMe) {
+            const credentials = { email, password };
+            localStorage.setItem('rememberedCredentials', JSON.stringify(credentials));
+            setSavedCredentials(credentials);
+          } else {
+            localStorage.removeItem('rememberedCredentials');
+            setSavedCredentials(null);
+          }
           
           toast({
             title: "Login Successful",
@@ -175,6 +210,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const logout = () => {
     setUser(null);
     localStorage.removeItem('cryptoUser');
+    // Do NOT remove rememberedCredentials on logout
     toast({
       title: "Logged out",
       description: "You have been logged out successfully",
@@ -187,7 +223,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     login,
     register,
     logout,
-    isAdmin: user?.role === 'admin'
+    isAdmin: user?.role === 'admin',
+    savedCredentials
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

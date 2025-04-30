@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -7,23 +7,34 @@ import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { useAuth } from '@/contexts/AuthContext';
 import { Bitcoin, ShieldCheck } from 'lucide-react';
+import { Checkbox } from '@/components/ui/checkbox';
 
 const LoginPage: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [rememberMe, setRememberMe] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
-  const { login } = useAuth();
+  const { login, savedCredentials } = useAuth();
 
   const redirectPath = location.state?.redirectAfterLogin || '/dashboard';
+  
+  // Use saved credentials if available
+  useEffect(() => {
+    if (savedCredentials) {
+      setEmail(savedCredentials.email);
+      setPassword(savedCredentials.password);
+      setRememberMe(true);
+    }
+  }, [savedCredentials]);
   
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
     setIsLoading(true);
     
     try {
-      const success = await login(email, password);
+      const success = await login(email, password, rememberMe);
       if (success) {
         // Check if the email is for admin
         if (email === 'admin@example.com') {
@@ -43,7 +54,7 @@ const LoginPage: React.FC = () => {
   const handleAdminLogin = async () => {
     setIsLoading(true);
     try {
-      const success = await login('admin@example.com', 'password');
+      const success = await login('admin@example.com', 'password', rememberMe);
       if (success) {
         navigate('/admin');
       } else {
@@ -97,6 +108,14 @@ const LoginPage: React.FC = () => {
                 required
                 className="bg-crypto-darker border-gray-700"
               />
+            </div>
+            <div className="flex items-center space-x-2">
+              <Checkbox 
+                id="remember-me" 
+                checked={rememberMe} 
+                onCheckedChange={() => setRememberMe(!rememberMe)}
+              />
+              <Label htmlFor="remember-me" className="text-sm cursor-pointer">Remember me</Label>
             </div>
             <Button 
               type="submit" 
