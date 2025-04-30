@@ -7,16 +7,23 @@ import { useCrypto } from '@/contexts/CryptoContext';
 import OverviewTab from '@/components/dashboard/OverviewTab';
 import TransactionsTab from '@/components/dashboard/TransactionsTab';
 import FutureTab from '@/components/dashboard/FutureTab';
+import { toast } from '@/hooks/use-toast';
 
 const DashboardPage: React.FC = () => {
   const { user } = useAuth();
-  const { getUserTransactions, approveTransaction, cancelTransaction } = useCrypto();
+  const { getUserTransactions, approveTransaction, cancelTransaction, transactions } = useCrypto();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('overview');
 
   useEffect(() => {
     if (!user) {
       navigate('/login');
+    } else {
+      // Show a welcome toast when dashboard loads
+      toast({
+        title: "Welcome back!",
+        description: `Logged in as ${user.name}`,
+      });
     }
   }, [user, navigate]);
 
@@ -31,14 +38,10 @@ const DashboardPage: React.FC = () => {
 
   const handleApproveTransaction = (transactionId: string) => {
     approveTransaction(transactionId);
-    // Refresh the user transactions after approval
-    getUserTransactions(user.id);
   };
 
   const handleCancelTransaction = (transactionId: string, reason: string) => {
     cancelTransaction(transactionId, reason);
-    // Refresh the user transactions after cancellation
-    getUserTransactions(user.id);
   };
 
   return (

@@ -29,7 +29,7 @@ export const useTransactionOperations = (
     setTransactions((prev) => {
       const updatedTransactions = prev.map((transaction) =>
         transaction.id === transactionId
-          ? { ...transaction, status: 'completed' }
+          ? { ...transaction, status: 'completed' as const }
           : transaction
       );
       localStorage.setItem('cryptoTransactions', JSON.stringify(updatedTransactions));
@@ -80,7 +80,7 @@ export const useTransactionOperations = (
     setTransactions((prev) => {
       const updatedTransactions = prev.map((transaction) =>
         transaction.id === transactionId
-          ? { ...transaction, status: 'cancelled', cancellationReason: reason }
+          ? { ...transaction, status: 'cancelled' as const, cancellationReason: reason }
           : transaction
       );
       localStorage.setItem('cryptoTransactions', JSON.stringify(updatedTransactions));
