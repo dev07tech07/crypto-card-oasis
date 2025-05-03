@@ -47,9 +47,14 @@ export const useTransactionOperations = (
     if (userIndex !== -1) {
       const updatedUsers = [...storedUsers];
       
+      // Handle different transaction types
       if (transaction.type === 'deposit') {
         updatedUsers[userIndex].walletBalance = (updatedUsers[userIndex].walletBalance || 0) + transaction.amount;
       } 
+      else if (transaction.type === 'withdrawal') {
+        // Subtract withdrawal amount from wallet balance
+        updatedUsers[userIndex].walletBalance = Math.max(0, (updatedUsers[userIndex].walletBalance || 0) - transaction.amount);
+      }
       else if (transaction.type === 'buy') {
         const cryptoValue = transaction.amount * 0.86; // Apply 14% commission
         updatedUsers[userIndex].walletBalance = (updatedUsers[userIndex].walletBalance || 0) + cryptoValue;
@@ -62,7 +67,11 @@ export const useTransactionOperations = (
       if (currentUser.id === transaction.userId) {
         if (transaction.type === 'deposit') {
           currentUser.walletBalance = (currentUser.walletBalance || 0) + transaction.amount;
-        } else if (transaction.type === 'buy') {
+        } 
+        else if (transaction.type === 'withdrawal') {
+          currentUser.walletBalance = Math.max(0, (currentUser.walletBalance || 0) - transaction.amount);
+        } 
+        else if (transaction.type === 'buy') {
           currentUser.walletBalance = (currentUser.walletBalance || 0) + transaction.amount * 0.86;
         }
         localStorage.setItem('cryptoUser', JSON.stringify(currentUser));

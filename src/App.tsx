@@ -15,6 +15,7 @@ import AdminPage from "./pages/AdminPage";
 import MarketPage from "./pages/MarketPage";
 import BuyCryptoPage from "./pages/BuyCryptoPage";
 import DepositPage from "./pages/DepositPage";
+import WithdrawPage from "./pages/WithdrawPage";
 import PendingTransactionPage from "./pages/PendingTransactionPage";
 import NotFound from "./pages/NotFound";
 
@@ -40,6 +41,7 @@ const App = () => (
                   <Route path="/market" element={<MarketPage />} />
                   <Route path="/buy/:cryptoId" element={<BuyCryptoPage />} />
                   <Route path="/dashboard/deposit" element={<DepositPage />} />
+                  <Route path="/dashboard/withdraw" element={<WithdrawPage />} />
                   <Route path="/transaction/pending" element={<PendingTransactionPage />} />
                   <Route path="*" element={<NotFound />} />
                 </Routes>
