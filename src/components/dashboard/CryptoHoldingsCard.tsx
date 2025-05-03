@@ -40,7 +40,7 @@ const CryptoHoldingsCard: React.FC = () => {
   // Enhance holdings with current price data
   const enhancedHoldings = user.cryptoHoldings.map((holding: CryptoHolding) => {
     const cryptoData = cryptocurrencies.find(c => 
-      c.id === holding.cryptoId || 
+      c.id.toLowerCase() === holding.cryptoId.toLowerCase() || 
       c.symbol.toLowerCase() === holding.symbol.toLowerCase()
     );
     
@@ -84,7 +84,7 @@ const CryptoHoldingsCard: React.FC = () => {
                         className="w-6 h-6 mr-2 rounded-full"
                       />
                     )}
-                    <span>{holding.name} ({holding.symbol})</span>
+                    <span>{holding.name} ({holding.symbol.toUpperCase()})</span>
                   </div>
                 </TableCell>
                 <TableCell className="text-right">

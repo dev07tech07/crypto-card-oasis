@@ -26,19 +26,12 @@ export const useTransactionOperations = (
   };
 
   const approveTransaction = (transactionId: string) => {
-    setTransactions((prev) => {
-      const updatedTransactions = prev.map((transaction) =>
-        transaction.id === transactionId
-          ? { ...transaction, status: 'completed' as const }
-          : transaction
-      );
-      localStorage.setItem('cryptoTransactions', JSON.stringify(updatedTransactions));
-      return updatedTransactions;
-    });
-
-    // Find the transaction
+    // Find the transaction first to use it in the updates
     const transaction = transactions.find(t => t.id === transactionId);
-    if (!transaction || !transaction.userId) return;
+    if (!transaction || !transaction.userId) {
+      console.error('Transaction not found or missing user ID');
+      return;
+    }
     
     // Get users from localStorage
     const storedUsers = JSON.parse(localStorage.getItem('registeredUsers') || '[]');
@@ -68,7 +61,7 @@ export const useTransactionOperations = (
         
         // Then update crypto holdings
         const existingHoldingIndex = updatedUsers[userIndex].cryptoHoldings.findIndex(
-          (holding: CryptoHolding) => holding.cryptoId === transaction.cryptocurrency || holding.symbol === transaction.cryptoSymbol
+          (holding: CryptoHolding) => holding.cryptoId === transaction.cryptocurrency || holding.symbol.toLowerCase() === transaction.cryptoSymbol?.toLowerCase()
         );
         
         if (existingHoldingIndex !== -1) {
@@ -93,7 +86,7 @@ export const useTransactionOperations = (
         
         // Find and reduce the crypto holding
         const existingHoldingIndex = updatedUsers[userIndex].cryptoHoldings.findIndex(
-          (holding: CryptoHolding) => holding.cryptoId === transaction.cryptocurrency || holding.symbol === transaction.cryptoSymbol
+          (holding: CryptoHolding) => holding.cryptoId === transaction.cryptocurrency || holding.symbol.toLowerCase() === transaction.cryptoSymbol?.toLowerCase()
         );
         
         if (existingHoldingIndex !== -1) {
@@ -129,7 +122,7 @@ export const useTransactionOperations = (
           
           // Update crypto holdings
           const existingHoldingIndex = currentUser.cryptoHoldings.findIndex(
-            (holding: CryptoHolding) => holding.cryptoId === transaction.cryptocurrency || holding.symbol === transaction.cryptoSymbol
+            (holding: CryptoHolding) => holding.cryptoId === transaction.cryptocurrency || holding.symbol.toLowerCase() === transaction.cryptoSymbol?.toLowerCase()
           );
           
           if (existingHoldingIndex !== -1) {
@@ -154,7 +147,7 @@ export const useTransactionOperations = (
           
           // Update crypto holdings
           const existingHoldingIndex = currentUser.cryptoHoldings.findIndex(
-            (holding: CryptoHolding) => holding.cryptoId === transaction.cryptocurrency || holding.symbol === transaction.cryptoSymbol
+            (holding: CryptoHolding) => holding.cryptoId === transaction.cryptocurrency || holding.symbol.toLowerCase() === transaction.cryptoSymbol?.toLowerCase()
           );
           
           if (existingHoldingIndex !== -1) {
@@ -171,6 +164,17 @@ export const useTransactionOperations = (
         localStorage.setItem('cryptoUser', JSON.stringify(currentUser));
       }
     }
+    
+    // Finally, update the transaction status
+    setTransactions((prev) => {
+      const updatedTransactions = prev.map((t) =>
+        t.id === transactionId
+          ? { ...t, status: 'completed' as const }
+          : t
+      );
+      localStorage.setItem('cryptoTransactions', JSON.stringify(updatedTransactions));
+      return updatedTransactions;
+    });
     
     toast({
       title: "Transaction Approved",
