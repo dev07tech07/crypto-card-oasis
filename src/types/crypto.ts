@@ -33,6 +33,14 @@ export interface Transaction {
   cancellationReason?: string;
 }
 
+export interface CryptoHolding {
+  cryptoId: string;
+  name: string;
+  symbol: string;
+  amount: number;
+  image?: string;
+}
+
 export interface CryptoContextType {
   cryptocurrencies: Cryptocurrency[];
   loading: boolean;

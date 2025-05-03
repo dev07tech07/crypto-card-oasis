@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import TransactionItem from '@/components/TransactionItem';
 import { Wallet, ArrowUpRight, ArrowDownLeft, History, Bitcoin, LineChart, User, HelpCircle } from 'lucide-react';
 import { Transaction } from '@/types/crypto';
+import CryptoHoldingsCard from './CryptoHoldingsCard';
 
 interface OverviewTabProps {
   walletBalance: number;
@@ -56,6 +57,8 @@ const OverviewTab: React.FC<OverviewTabProps> = ({
           </div>
         </CardContent>
       </Card>
+      
+      <CryptoHoldingsCard />
       
       <Card className="crypto-card">
         <CardHeader className="pb-2">

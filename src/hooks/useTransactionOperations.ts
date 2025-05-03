@@ -1,5 +1,5 @@
 
-import type { Transaction } from '../types/crypto';
+import type { Transaction, CryptoHolding } from '../types/crypto';
 import { toast } from '@/hooks/use-toast';
 
 export const useTransactionOperations = (
@@ -47,6 +47,11 @@ export const useTransactionOperations = (
     if (userIndex !== -1) {
       const updatedUsers = [...storedUsers];
       
+      // Initialize crypto holdings if not exists
+      if (!updatedUsers[userIndex].cryptoHoldings) {
+        updatedUsers[userIndex].cryptoHoldings = [];
+      }
+      
       // Handle different transaction types
       if (transaction.type === 'deposit') {
         updatedUsers[userIndex].walletBalance = (updatedUsers[userIndex].walletBalance || 0) + transaction.amount;
@@ -55,9 +60,24 @@ export const useTransactionOperations = (
         // Subtract withdrawal amount from wallet balance
         updatedUsers[userIndex].walletBalance = Math.max(0, (updatedUsers[userIndex].walletBalance || 0) - transaction.amount);
       }
-      else if (transaction.type === 'buy') {
-        const cryptoValue = transaction.amount * 0.86; // Apply 14% commission
-        updatedUsers[userIndex].walletBalance = (updatedUsers[userIndex].walletBalance || 0) + cryptoValue;
+      else if (transaction.type === 'buy' && transaction.cryptocurrency && transaction.cryptoSymbol && transaction.cryptoAmount) {
+        // For crypto purchases, add to specific crypto holdings
+        const existingHoldingIndex = updatedUsers[userIndex].cryptoHoldings.findIndex(
+          (holding: CryptoHolding) => holding.symbol === transaction.cryptoSymbol
+        );
+        
+        if (existingHoldingIndex !== -1) {
+          // Update existing holding
+          updatedUsers[userIndex].cryptoHoldings[existingHoldingIndex].amount += transaction.cryptoAmount;
+        } else {
+          // Add new holding
+          updatedUsers[userIndex].cryptoHoldings.push({
+            cryptoId: transaction.cryptocurrency,
+            name: transaction.cryptocurrency,
+            symbol: transaction.cryptoSymbol,
+            amount: transaction.cryptoAmount,
+          });
+        }
       }
       
       localStorage.setItem('registeredUsers', JSON.stringify(updatedUsers));
@@ -71,9 +91,30 @@ export const useTransactionOperations = (
         else if (transaction.type === 'withdrawal') {
           currentUser.walletBalance = Math.max(0, (currentUser.walletBalance || 0) - transaction.amount);
         } 
-        else if (transaction.type === 'buy') {
-          currentUser.walletBalance = (currentUser.walletBalance || 0) + transaction.amount * 0.86;
+        else if (transaction.type === 'buy' && transaction.cryptocurrency && transaction.cryptoSymbol && transaction.cryptoAmount) {
+          // Initialize crypto holdings if not exists
+          if (!currentUser.cryptoHoldings) {
+            currentUser.cryptoHoldings = [];
+          }
+          
+          const existingHoldingIndex = currentUser.cryptoHoldings.findIndex(
+            (holding: CryptoHolding) => holding.symbol === transaction.cryptoSymbol
+          );
+          
+          if (existingHoldingIndex !== -1) {
+            // Update existing holding
+            currentUser.cryptoHoldings[existingHoldingIndex].amount += transaction.cryptoAmount;
+          } else {
+            // Add new holding
+            currentUser.cryptoHoldings.push({
+              cryptoId: transaction.cryptocurrency,
+              name: transaction.cryptocurrency,
+              symbol: transaction.cryptoSymbol,
+              amount: transaction.cryptoAmount,
+            });
+          }
         }
+        
         localStorage.setItem('cryptoUser', JSON.stringify(currentUser));
       }
     }
