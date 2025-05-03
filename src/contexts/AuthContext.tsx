@@ -55,7 +55,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     register,
     logout,
     isAdmin: user?.role === 'admin',
-    savedCredentials
+    savedCredentials,
+    setUser // Export setUser to allow updating user state
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

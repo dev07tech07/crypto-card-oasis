@@ -18,4 +18,5 @@ export interface AuthContextType {
   logout: () => void;
   isAdmin: boolean;
   savedCredentials: { email: string; password: string } | null;
+  setUser: React.Dispatch<React.SetStateAction<User | null>>; // Add setUser
 }

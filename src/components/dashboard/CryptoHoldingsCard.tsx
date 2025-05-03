@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useAuth } from '@/contexts/AuthContext';
@@ -8,8 +8,23 @@ import { CryptoHolding } from '@/types/crypto';
 import { Bitcoin, AlertCircle } from "lucide-react";
 
 const CryptoHoldingsCard: React.FC = () => {
-  const { user } = useAuth();
+  const { user, setUser } = useAuth();
   const { cryptocurrencies } = useCrypto();
+  
+  // Reload user data from localStorage on component mount
+  useEffect(() => {
+    if (user) {
+      const storedUser = localStorage.getItem('cryptoUser');
+      if (storedUser) {
+        try {
+          const refreshedUser = JSON.parse(storedUser);
+          setUser(refreshedUser);
+        } catch (error) {
+          console.error('Failed to parse user data', error);
+        }
+      }
+    }
+  }, [user?.id, setUser]);
   
   // Debug log to check if user and holdings exist
   console.log('User in CryptoHoldingsCard:', user);
