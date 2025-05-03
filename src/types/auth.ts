@@ -1,10 +1,13 @@
 
+import { CryptoHolding } from './crypto';
+
 export interface User {
   id: string;
   email: string;
   name: string;
   role: 'user' | 'admin';
   walletBalance: number;
+  cryptoHoldings?: CryptoHolding[];
 }
 
 export interface AuthContextType {
