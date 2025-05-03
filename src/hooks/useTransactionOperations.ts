@@ -61,9 +61,14 @@ export const useTransactionOperations = (
         updatedUsers[userIndex].walletBalance = Math.max(0, (updatedUsers[userIndex].walletBalance || 0) - transaction.amount);
       }
       else if (transaction.type === 'buy' && transaction.cryptocurrency && transaction.cryptoSymbol && transaction.cryptoAmount) {
-        // For crypto purchases, add to specific crypto holdings
+        // For crypto purchases, add to specific crypto holdings AND subtract the amount from wallet
+        
+        // First subtract the purchase amount from wallet balance
+        updatedUsers[userIndex].walletBalance = Math.max(0, (updatedUsers[userIndex].walletBalance || 0) - transaction.amount);
+        
+        // Then update crypto holdings
         const existingHoldingIndex = updatedUsers[userIndex].cryptoHoldings.findIndex(
-          (holding: CryptoHolding) => holding.symbol === transaction.cryptoSymbol
+          (holding: CryptoHolding) => holding.cryptoId === transaction.cryptocurrency || holding.symbol === transaction.cryptoSymbol
         );
         
         if (existingHoldingIndex !== -1) {
@@ -72,11 +77,33 @@ export const useTransactionOperations = (
         } else {
           // Add new holding
           updatedUsers[userIndex].cryptoHoldings.push({
-            cryptoId: transaction.cryptocurrency,
-            name: transaction.cryptocurrency,
-            symbol: transaction.cryptoSymbol,
-            amount: transaction.cryptoAmount,
+            cryptoId: transaction.cryptocurrency || '',
+            name: transaction.cryptocurrency || '',
+            symbol: transaction.cryptoSymbol || '',
+            amount: transaction.cryptoAmount || 0,
           });
+        }
+        
+        // Log the updated holdings for debugging
+        console.log(`Updated crypto holdings for user ${transaction.userId}:`, updatedUsers[userIndex].cryptoHoldings);
+      }
+      else if (transaction.type === 'sell' && transaction.cryptocurrency && transaction.cryptoSymbol && transaction.cryptoAmount) {
+        // Add the sold amount to wallet balance
+        updatedUsers[userIndex].walletBalance = (updatedUsers[userIndex].walletBalance || 0) + transaction.amount;
+        
+        // Find and reduce the crypto holding
+        const existingHoldingIndex = updatedUsers[userIndex].cryptoHoldings.findIndex(
+          (holding: CryptoHolding) => holding.cryptoId === transaction.cryptocurrency || holding.symbol === transaction.cryptoSymbol
+        );
+        
+        if (existingHoldingIndex !== -1) {
+          // Reduce the amount
+          updatedUsers[userIndex].cryptoHoldings[existingHoldingIndex].amount -= transaction.cryptoAmount;
+          
+          // Remove the holding if amount is zero or less
+          if (updatedUsers[userIndex].cryptoHoldings[existingHoldingIndex].amount <= 0) {
+            updatedUsers[userIndex].cryptoHoldings.splice(existingHoldingIndex, 1);
+          }
         }
       }
       
@@ -97,8 +124,12 @@ export const useTransactionOperations = (
             currentUser.cryptoHoldings = [];
           }
           
+          // Update wallet balance
+          currentUser.walletBalance = Math.max(0, (currentUser.walletBalance || 0) - transaction.amount);
+          
+          // Update crypto holdings
           const existingHoldingIndex = currentUser.cryptoHoldings.findIndex(
-            (holding: CryptoHolding) => holding.symbol === transaction.cryptoSymbol
+            (holding: CryptoHolding) => holding.cryptoId === transaction.cryptocurrency || holding.symbol === transaction.cryptoSymbol
           );
           
           if (existingHoldingIndex !== -1) {
@@ -107,11 +138,33 @@ export const useTransactionOperations = (
           } else {
             // Add new holding
             currentUser.cryptoHoldings.push({
-              cryptoId: transaction.cryptocurrency,
-              name: transaction.cryptocurrency,
-              symbol: transaction.cryptoSymbol,
-              amount: transaction.cryptoAmount,
+              cryptoId: transaction.cryptocurrency || '',
+              name: transaction.cryptocurrency || '',
+              symbol: transaction.cryptoSymbol || '',
+              amount: transaction.cryptoAmount || 0,
             });
+          }
+          
+          // Log for debugging
+          console.log(`Updated current user's crypto holdings:`, currentUser.cryptoHoldings);
+        }
+        else if (transaction.type === 'sell' && transaction.cryptocurrency && transaction.cryptoSymbol && transaction.cryptoAmount) {
+          // Update wallet balance
+          currentUser.walletBalance = (currentUser.walletBalance || 0) + transaction.amount;
+          
+          // Update crypto holdings
+          const existingHoldingIndex = currentUser.cryptoHoldings.findIndex(
+            (holding: CryptoHolding) => holding.cryptoId === transaction.cryptocurrency || holding.symbol === transaction.cryptoSymbol
+          );
+          
+          if (existingHoldingIndex !== -1) {
+            // Reduce the amount
+            currentUser.cryptoHoldings[existingHoldingIndex].amount -= transaction.cryptoAmount;
+            
+            // Remove the holding if amount is zero or less
+            if (currentUser.cryptoHoldings[existingHoldingIndex].amount <= 0) {
+              currentUser.cryptoHoldings.splice(existingHoldingIndex, 1);
+            }
           }
         }
         

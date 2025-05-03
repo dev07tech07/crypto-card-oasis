@@ -5,11 +5,15 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { useAuth } from '@/contexts/AuthContext';
 import { useCrypto } from '@/contexts/CryptoContext';
 import { CryptoHolding } from '@/types/crypto';
-import { Bitcoin } from "lucide-react";
+import { Bitcoin, AlertCircle } from "lucide-react";
 
 const CryptoHoldingsCard: React.FC = () => {
   const { user } = useAuth();
   const { cryptocurrencies } = useCrypto();
+  
+  // Debug log to check if user and holdings exist
+  console.log('User in CryptoHoldingsCard:', user);
+  console.log('User crypto holdings:', user?.cryptoHoldings);
   
   if (!user || !user.cryptoHoldings || user.cryptoHoldings.length === 0) {
     return (
@@ -22,9 +26,12 @@ const CryptoHoldingsCard: React.FC = () => {
           <CardDescription>Your cryptocurrency portfolio</CardDescription>
         </CardHeader>
         <CardContent>
-          <p className="text-muted-foreground text-center py-4">
-            You don't own any cryptocurrencies yet. Start by buying some crypto!
-          </p>
+          <div className="flex flex-col items-center justify-center py-6 space-y-4">
+            <AlertCircle className="h-12 w-12 text-muted-foreground" />
+            <p className="text-muted-foreground text-center">
+              You don't own any cryptocurrencies yet. Start by buying some crypto!
+            </p>
+          </div>
         </CardContent>
       </Card>
     );
