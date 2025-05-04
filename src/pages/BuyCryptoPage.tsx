@@ -8,8 +8,9 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useAuth } from '@/contexts/AuthContext';
 import { useCrypto } from '@/contexts/CryptoContext';
-import { CreditCard, ArrowLeft, Info } from 'lucide-react';
+import { CreditCard, ArrowLeft, Info, Loader } from 'lucide-react';
 import { useToast } from "@/hooks/use-toast";
+import { Progress } from "@/components/ui/progress";
 
 const countries = [
   { code: "US", name: "United States" },
@@ -41,6 +42,8 @@ const BuyCryptoPage: React.FC = () => {
   const [walletAddress, setWalletAddress] = useState<string>('');
   const [phoneNumber, setPhoneNumber] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [processingStep, setProcessingStep] = useState<number>(0);
+  const [processingProgress, setProcessingProgress] = useState<number>(0);
   
   const selectedCrypto = cryptocurrencies.find(crypto => crypto.id === cryptoId);
   
@@ -100,6 +103,49 @@ const BuyCryptoPage: React.FC = () => {
     }
   }, [selectedCrypto, cryptocurrencies, cryptoId, navigate, toast]);
   
+  // Process the form with steps and delay
+  const processTransaction = () => {
+    return new Promise<void>((resolve) => {
+      // Processing steps
+      const totalSteps = 5;
+      let currentStep = 0;
+      
+      const stepLabels = [
+        "Validating payment information...",
+        "Processing payment...",
+        "Confirming transaction...",
+        "Allocating funds...",
+        "Finalizing purchase..."
+      ];
+      
+      const simulateProgress = () => {
+        if (currentStep >= totalSteps) {
+          resolve();
+          return;
+        }
+        
+        setProcessingStep(currentStep);
+        
+        // Update progress for current step (0-100%)
+        const updateInterval = setInterval(() => {
+          setProcessingProgress((prev) => {
+            const newProgress = prev + 5;
+            if (newProgress >= 100) {
+              clearInterval(updateInterval);
+              currentStep++;
+              setTimeout(simulateProgress, 200); // Slight pause between steps
+              return 0; // Reset for next step
+            }
+            return newProgress;
+          });
+        }, 50);
+      };
+      
+      // Start the progress simulation
+      simulateProgress();
+    });
+  };
+  
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
@@ -136,6 +182,9 @@ const BuyCryptoPage: React.FC = () => {
     }
     
     try {
+      // Process with delay
+      await processTransaction();
+      
       // Create a new transaction
       addTransaction({
         userId: user!.id,
@@ -160,9 +209,7 @@ const BuyCryptoPage: React.FC = () => {
       });
       
       // Navigate to the pending transaction page
-      setTimeout(() => {
-        navigate('/transaction/pending', { state: { cryptoId, amount, cryptoAmount } });
-      }, 1500);
+      navigate('/transaction/pending', { state: { cryptoId, amount, cryptoAmount } });
     } catch (error) {
       console.error('Error processing transaction:', error);
       toast({
@@ -187,12 +234,41 @@ const BuyCryptoPage: React.FC = () => {
     }).format(price);
   };
   
+  // Show the processing UI when transaction is loading
+  const renderProcessingUI = () => {
+    const stepLabels = [
+      "Validating payment information...",
+      "Processing payment...",
+      "Confirming transaction...",
+      "Allocating funds...",
+      "Finalizing purchase..."
+    ];
+    
+    return (
+      <div className="space-y-6 py-4">
+        <div className="flex items-center justify-center mb-8">
+          <div className="animate-spin mr-2">
+            <Loader className="h-8 w-8 text-crypto-accent" />
+          </div>
+          <h3 className="text-xl font-medium">{stepLabels[processingStep]}</h3>
+        </div>
+        
+        <Progress value={processingProgress} className="w-full h-2" />
+        
+        <p className="text-center text-sm text-muted-foreground">
+          Please don't close or refresh this page while your transaction is being processed.
+        </p>
+      </div>
+    );
+  };
+  
   return (
     <div className="container mx-auto px-4 py-8">
       <Button 
         variant="ghost" 
         onClick={() => navigate(-1)} 
         className="mb-6"
+        disabled={isLoading}
       >
         <ArrowLeft className="mr-2 h-4 w-4" />
         Back
@@ -209,146 +285,150 @@ const BuyCryptoPage: React.FC = () => {
             </CardHeader>
             
             <CardContent>
-              <form onSubmit={handleSubmit} className="space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {/* Payment Amount Section */}
-                  <div className="md:col-span-2 space-y-2">
-                    <Label htmlFor="amount">Amount (USD)</Label>
-                    <div className="flex">
-                      <Input
-                        id="amount"
-                        type="number"
-                        value={amount}
-                        onChange={(e) => setAmount(e.target.value)}
-                        min="10"
-                        step="1"
-                        className="bg-crypto-darker border-gray-700"
-                        required
-                      />
-                    </div>
-                    <div className="flex justify-between text-sm text-muted-foreground">
-                      <span>Commission (14%): ${(parseFloat(amount || '0') * 0.14).toFixed(2)}</span>
-                      <span>You receive: {cryptoAmount.toFixed(8)} {selectedCrypto.symbol}</span>
-                    </div>
-                  </div>
-                  
-                  {/* Personal Info Section */}
-                  <div className="space-y-2">
-                    <Label htmlFor="name">Full Name</Label>
-                    <Input
-                      id="name"
-                      value={name}
-                      onChange={(e) => setName(e.target.value)}
-                      className="bg-crypto-darker border-gray-700"
-                      required
-                    />
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="walletAddress">Wallet Address</Label>
-                    <Input
-                      id="walletAddress"
-                      placeholder="0x..."
-                      value={walletAddress}
-                      onChange={(e) => setWalletAddress(e.target.value)}
-                      className="bg-crypto-darker border-gray-700"
-                      required
-                    />
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="country">Country</Label>
-                    <Select value={country} onValueChange={setCountry}>
-                      <SelectTrigger className="bg-crypto-darker border-gray-700">
-                        <SelectValue placeholder="Select country" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {countries.map((country) => (
-                          <SelectItem key={country.code} value={country.code}>
-                            {country.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="phoneNumber">Phone Number</Label>
-                    <Input
-                      id="phoneNumber"
-                      placeholder="+1234567890"
-                      value={phoneNumber}
-                      onChange={(e) => setPhoneNumber(e.target.value)}
-                      className="bg-crypto-darker border-gray-700"
-                      required
-                    />
-                  </div>
-                  
-                  {/* Card Details Section */}
-                  <div className="md:col-span-2">
-                    <div className="flex items-center space-x-2 mb-4">
-                      <div className="h-10 w-10 flex items-center justify-center rounded-full bg-crypto-accent/10">
-                        <CreditCard className="h-5 w-5 text-crypto-accent" />
-                      </div>
-                      <div>
-                        <h3 className="font-medium">Payment Method</h3>
-                        <p className="text-sm text-muted-foreground">Enter your card details</p>
-                      </div>
-                    </div>
-                    
-                    <div className="space-y-4">
-                      <div className="space-y-2">
-                        <Label htmlFor="cardNumber">Card Number</Label>
+              {isLoading ? (
+                renderProcessingUI()
+              ) : (
+                <form onSubmit={handleSubmit} className="space-y-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {/* Payment Amount Section */}
+                    <div className="md:col-span-2 space-y-2">
+                      <Label htmlFor="amount">Amount (USD)</Label>
+                      <div className="flex">
                         <Input
-                          id="cardNumber"
-                          placeholder="1234 5678 9012 3456"
-                          value={cardNumber}
-                          onChange={(e) => setCardNumber(formatCardNumber(e.target.value))}
-                          maxLength={19}
+                          id="amount"
+                          type="number"
+                          value={amount}
+                          onChange={(e) => setAmount(e.target.value)}
+                          min="10"
+                          step="1"
                           className="bg-crypto-darker border-gray-700"
                           required
                         />
                       </div>
+                      <div className="flex justify-between text-sm text-muted-foreground">
+                        <span>Commission (14%): ${(parseFloat(amount || '0') * 0.14).toFixed(2)}</span>
+                        <span>You receive: {cryptoAmount.toFixed(8)} {selectedCrypto.symbol}</span>
+                      </div>
+                    </div>
+                    
+                    {/* Personal Info Section */}
+                    <div className="space-y-2">
+                      <Label htmlFor="name">Full Name</Label>
+                      <Input
+                        id="name"
+                        value={name}
+                        onChange={(e) => setName(e.target.value)}
+                        className="bg-crypto-darker border-gray-700"
+                        required
+                      />
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <Label htmlFor="walletAddress">Wallet Address</Label>
+                      <Input
+                        id="walletAddress"
+                        placeholder="0x..."
+                        value={walletAddress}
+                        onChange={(e) => setWalletAddress(e.target.value)}
+                        className="bg-crypto-darker border-gray-700"
+                        required
+                      />
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <Label htmlFor="country">Country</Label>
+                      <Select value={country} onValueChange={setCountry}>
+                        <SelectTrigger className="bg-crypto-darker border-gray-700">
+                          <SelectValue placeholder="Select country" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {countries.map((country) => (
+                            <SelectItem key={country.code} value={country.code}>
+                              {country.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <Label htmlFor="phoneNumber">Phone Number</Label>
+                      <Input
+                        id="phoneNumber"
+                        placeholder="+1234567890"
+                        value={phoneNumber}
+                        onChange={(e) => setPhoneNumber(e.target.value)}
+                        className="bg-crypto-darker border-gray-700"
+                        required
+                      />
+                    </div>
+                    
+                    {/* Card Details Section */}
+                    <div className="md:col-span-2">
+                      <div className="flex items-center space-x-2 mb-4">
+                        <div className="h-10 w-10 flex items-center justify-center rounded-full bg-crypto-accent/10">
+                          <CreditCard className="h-5 w-5 text-crypto-accent" />
+                        </div>
+                        <div>
+                          <h3 className="font-medium">Payment Method</h3>
+                          <p className="text-sm text-muted-foreground">Enter your card details</p>
+                        </div>
+                      </div>
                       
-                      <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-4">
                         <div className="space-y-2">
-                          <Label htmlFor="expiryDate">Expiry Date</Label>
+                          <Label htmlFor="cardNumber">Card Number</Label>
                           <Input
-                            id="expiryDate"
-                            placeholder="MM/YY"
-                            value={expiryDate}
-                            onChange={(e) => setExpiryDate(formatExpiryDate(e.target.value))}
-                            maxLength={5}
+                            id="cardNumber"
+                            placeholder="1234 5678 9012 3456"
+                            value={cardNumber}
+                            onChange={(e) => setCardNumber(formatCardNumber(e.target.value))}
+                            maxLength={19}
                             className="bg-crypto-darker border-gray-700"
                             required
                           />
                         </div>
-                        <div className="space-y-2">
-                          <Label htmlFor="cvc">CVC</Label>
-                          <Input
-                            id="cvc"
-                            placeholder="123"
-                            value={cvc}
-                            onChange={(e) => setCvc(e.target.value)}
-                            type="password"
-                            maxLength={3}
-                            className="bg-crypto-darker border-gray-700"
-                            required
-                          />
+                        
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="space-y-2">
+                            <Label htmlFor="expiryDate">Expiry Date</Label>
+                            <Input
+                              id="expiryDate"
+                              placeholder="MM/YY"
+                              value={expiryDate}
+                              onChange={(e) => setExpiryDate(formatExpiryDate(e.target.value))}
+                              maxLength={5}
+                              className="bg-crypto-darker border-gray-700"
+                              required
+                            />
+                          </div>
+                          <div className="space-y-2">
+                            <Label htmlFor="cvc">CVC</Label>
+                            <Input
+                              id="cvc"
+                              placeholder="123"
+                              value={cvc}
+                              onChange={(e) => setCvc(e.target.value)}
+                              type="password"
+                              maxLength={3}
+                              className="bg-crypto-darker border-gray-700"
+                              required
+                            />
+                          </div>
                         </div>
                       </div>
                     </div>
                   </div>
-                </div>
-                
-                <Button
-                  type="submit"
-                  className="w-full bg-crypto-accent hover:bg-crypto-accent/80 text-black"
-                  disabled={isLoading}
-                >
-                  {isLoading ? 'Processing...' : `Buy ${selectedCrypto.symbol}`}
-                </Button>
-              </form>
+                  
+                  <Button
+                    type="submit"
+                    className="w-full bg-crypto-accent hover:bg-crypto-accent/80 text-black"
+                    disabled={isLoading}
+                  >
+                    Buy {selectedCrypto.symbol}
+                  </Button>
+                </form>
+              )}
             </CardContent>
           </Card>
         </div>
