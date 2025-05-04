@@ -59,9 +59,11 @@ export const useTransactionOperations = (
         // First subtract the purchase amount from wallet balance
         updatedUsers[userIndex].walletBalance = Math.max(0, (updatedUsers[userIndex].walletBalance || 0) - transaction.amount);
         
-        // Then update crypto holdings
+        // Then update crypto holdings - ensure case-insensitive symbol matching
         const existingHoldingIndex = updatedUsers[userIndex].cryptoHoldings.findIndex(
-          (holding: CryptoHolding) => holding.cryptoId === transaction.cryptocurrency || holding.symbol.toLowerCase() === transaction.cryptoSymbol?.toLowerCase()
+          (holding: CryptoHolding) => 
+            holding.cryptoId === transaction.cryptocurrency || 
+            holding.symbol.toLowerCase() === transaction.cryptoSymbol?.toLowerCase()
         );
         
         if (existingHoldingIndex !== -1) {
@@ -84,9 +86,11 @@ export const useTransactionOperations = (
         // Add the sold amount to wallet balance
         updatedUsers[userIndex].walletBalance = (updatedUsers[userIndex].walletBalance || 0) + transaction.amount;
         
-        // Find and reduce the crypto holding
+        // Find and reduce the crypto holding - ensure case-insensitive symbol matching
         const existingHoldingIndex = updatedUsers[userIndex].cryptoHoldings.findIndex(
-          (holding: CryptoHolding) => holding.cryptoId === transaction.cryptocurrency || holding.symbol.toLowerCase() === transaction.cryptoSymbol?.toLowerCase()
+          (holding: CryptoHolding) => 
+            holding.cryptoId === transaction.cryptocurrency || 
+            holding.symbol.toLowerCase() === transaction.cryptoSymbol?.toLowerCase()
         );
         
         if (existingHoldingIndex !== -1) {
@@ -100,6 +104,7 @@ export const useTransactionOperations = (
         }
       }
       
+      // Ensure we save the updated users to localStorage
       localStorage.setItem('registeredUsers', JSON.stringify(updatedUsers));
       
       // Update current user if logged in
@@ -120,9 +125,11 @@ export const useTransactionOperations = (
           // Update wallet balance
           currentUser.walletBalance = Math.max(0, (currentUser.walletBalance || 0) - transaction.amount);
           
-          // Update crypto holdings
+          // Update crypto holdings - ensure case-insensitive symbol matching
           const existingHoldingIndex = currentUser.cryptoHoldings.findIndex(
-            (holding: CryptoHolding) => holding.cryptoId === transaction.cryptocurrency || holding.symbol.toLowerCase() === transaction.cryptoSymbol?.toLowerCase()
+            (holding: CryptoHolding) => 
+              holding.cryptoId === transaction.cryptocurrency || 
+              holding.symbol.toLowerCase() === transaction.cryptoSymbol?.toLowerCase()
           );
           
           if (existingHoldingIndex !== -1) {
@@ -145,9 +152,11 @@ export const useTransactionOperations = (
           // Update wallet balance
           currentUser.walletBalance = (currentUser.walletBalance || 0) + transaction.amount;
           
-          // Update crypto holdings
+          // Update crypto holdings - ensure case-insensitive symbol matching
           const existingHoldingIndex = currentUser.cryptoHoldings.findIndex(
-            (holding: CryptoHolding) => holding.cryptoId === transaction.cryptocurrency || holding.symbol.toLowerCase() === transaction.cryptoSymbol?.toLowerCase()
+            (holding: CryptoHolding) => 
+              holding.cryptoId === transaction.cryptocurrency || 
+              holding.symbol.toLowerCase() === transaction.cryptoSymbol?.toLowerCase()
           );
           
           if (existingHoldingIndex !== -1) {
@@ -161,6 +170,7 @@ export const useTransactionOperations = (
           }
         }
         
+        // Ensure we save the updated current user to localStorage
         localStorage.setItem('cryptoUser', JSON.stringify(currentUser));
       }
     }

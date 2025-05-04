@@ -10,16 +10,19 @@ import CryptoHoldingsCard from './CryptoHoldingsCard';
 
 interface OverviewTabProps {
   walletBalance: number;
+  totalCryptoValue: number;
   pendingTransactions: Transaction[];
   setActiveTab: (tab: string) => void;
 }
 
 const OverviewTab: React.FC<OverviewTabProps> = ({
   walletBalance,
+  totalCryptoValue,
   pendingTransactions,
   setActiveTab
 }) => {
   const navigate = useNavigate();
+  const totalBalance = walletBalance + totalCryptoValue;
   
   return (
     <div className="space-y-6">
@@ -34,8 +37,14 @@ const OverviewTab: React.FC<OverviewTabProps> = ({
         <CardContent>
           <div className="mb-6">
             <h3 className="text-3xl font-bold">
-              ${walletBalance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+              ${totalBalance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
             </h3>
+            <div className="text-sm text-muted-foreground mt-1">
+              <span className="mr-2">Cash: ${walletBalance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+              {totalCryptoValue > 0 && (
+                <span>Crypto: ${totalCryptoValue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+              )}
+            </div>
           </div>
           
           <div className="flex space-x-2">

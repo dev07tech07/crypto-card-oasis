@@ -10,22 +10,46 @@ import FutureTab from '@/components/dashboard/FutureTab';
 import { toast } from '@/hooks/use-toast';
 
 const DashboardPage: React.FC = () => {
-  const { user } = useAuth();
-  const { getUserTransactions, approveTransaction, cancelTransaction, transactions } = useCrypto();
+  const { user, setUser } = useAuth();
+  const { getUserTransactions, approveTransaction, cancelTransaction, cryptocurrencies } = useCrypto();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('overview');
+  const [totalCryptoValue, setTotalCryptoValue] = useState(0);
 
   useEffect(() => {
     if (!user) {
       navigate('/login');
     } else {
-      // Show a welcome toast when dashboard loads
-      toast({
-        title: "Welcome back!",
-        description: `Logged in as ${user.name}`,
-      });
+      // Calculate total crypto value
+      if (user.cryptoHoldings && cryptocurrencies.length > 0) {
+        const total = user.cryptoHoldings.reduce((sum, holding) => {
+          const crypto = cryptocurrencies.find(c => 
+            c.id.toLowerCase() === holding.cryptoId.toLowerCase() ||
+            c.symbol.toLowerCase() === holding.symbol.toLowerCase()
+          );
+          return sum + (holding.amount * (crypto?.price || 0));
+        }, 0);
+        setTotalCryptoValue(total);
+      }
+
+      // Refresh user data from localStorage
+      const storedUser = localStorage.getItem('cryptoUser');
+      if (storedUser) {
+        try {
+          const refreshedUser = JSON.parse(storedUser);
+          setUser(refreshedUser);
+          
+          // Show a welcome toast when dashboard loads
+          toast({
+            title: "Welcome back!",
+            description: `Logged in as ${refreshedUser.name}`,
+          });
+        } catch (error) {
+          console.error('Failed to parse user data', error);
+        }
+      }
     }
-  }, [user, navigate]);
+  }, [user, navigate, cryptocurrencies, setUser]);
 
   if (!user) {
     return null;
@@ -61,6 +85,7 @@ const DashboardPage: React.FC = () => {
         <TabsContent value="overview">
           <OverviewTab 
             walletBalance={user.walletBalance} 
+            totalCryptoValue={totalCryptoValue}
             pendingTransactions={pendingTransactions}
             setActiveTab={setActiveTab}
           />
