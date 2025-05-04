@@ -9,22 +9,27 @@ import { Bitcoin, AlertCircle } from "lucide-react";
 
 const CryptoHoldingsCard: React.FC = () => {
   const { user, setUser } = useAuth();
-  const { cryptocurrencies } = useCrypto();
+  const { cryptocurrencies, loadSavedTransactions } = useCrypto();
   
-  // Reload user data from localStorage on component mount
+  // Reload user data and transactions on component mount
   useEffect(() => {
+    // Refresh transactions
+    loadSavedTransactions();
+    
+    // Refresh user data from localStorage
     if (user) {
       const storedUser = localStorage.getItem('cryptoUser');
       if (storedUser) {
         try {
           const refreshedUser = JSON.parse(storedUser);
           setUser(refreshedUser);
+          console.log('CryptoHoldingsCard - Refreshed user data:', refreshedUser);
         } catch (error) {
           console.error('Failed to parse user data', error);
         }
       }
     }
-  }, [user?.id, setUser]);
+  }, [loadSavedTransactions, setUser, user]);
   
   // Debug log to check if user and holdings exist
   console.log('User in CryptoHoldingsCard:', user);

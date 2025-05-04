@@ -11,7 +11,7 @@ import { toast } from '@/hooks/use-toast';
 
 const DashboardPage: React.FC = () => {
   const { user, setUser } = useAuth();
-  const { getUserTransactions, approveTransaction, cancelTransaction, cryptocurrencies } = useCrypto();
+  const { getUserTransactions, approveTransaction, cancelTransaction, cryptocurrencies, loadSavedTransactions } = useCrypto();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('overview');
   const [totalCryptoValue, setTotalCryptoValue] = useState(0);
@@ -19,37 +19,45 @@ const DashboardPage: React.FC = () => {
   useEffect(() => {
     if (!user) {
       navigate('/login');
-    } else {
-      // Calculate total crypto value
-      if (user.cryptoHoldings && cryptocurrencies.length > 0) {
-        const total = user.cryptoHoldings.reduce((sum, holding) => {
-          const crypto = cryptocurrencies.find(c => 
-            c.id.toLowerCase() === holding.cryptoId.toLowerCase() ||
-            c.symbol.toLowerCase() === holding.symbol.toLowerCase()
-          );
-          return sum + (holding.amount * (crypto?.price || 0));
-        }, 0);
-        setTotalCryptoValue(total);
-      }
-
-      // Refresh user data from localStorage
-      const storedUser = localStorage.getItem('cryptoUser');
-      if (storedUser) {
-        try {
-          const refreshedUser = JSON.parse(storedUser);
-          setUser(refreshedUser);
-          
-          // Show a welcome toast when dashboard loads
-          toast({
-            title: "Welcome back!",
-            description: `Logged in as ${refreshedUser.name}`,
-          });
-        } catch (error) {
-          console.error('Failed to parse user data', error);
-        }
+      return;
+    }
+    
+    // Force reload transactions and user data
+    loadSavedTransactions();
+    
+    // Refresh user data from localStorage
+    const storedUser = localStorage.getItem('cryptoUser');
+    if (storedUser) {
+      try {
+        const refreshedUser = JSON.parse(storedUser);
+        setUser(refreshedUser);
+        
+        // Show a welcome toast when dashboard loads
+        toast({
+          title: "Welcome back!",
+          description: `Logged in as ${refreshedUser.name}`,
+        });
+      } catch (error) {
+        console.error('Failed to parse user data', error);
       }
     }
-  }, [user, navigate, cryptocurrencies, setUser]);
+  }, [navigate, setUser, loadSavedTransactions]);
+
+  // Calculate total crypto value whenever user data or cryptocurrencies change
+  useEffect(() => {
+    if (user?.cryptoHoldings && cryptocurrencies.length > 0) {
+      const total = user.cryptoHoldings.reduce((sum, holding) => {
+        const crypto = cryptocurrencies.find(c => 
+          c.id.toLowerCase() === holding.cryptoId.toLowerCase() ||
+          c.symbol.toLowerCase() === holding.symbol.toLowerCase()
+        );
+        return sum + (holding.amount * (crypto?.price || 0));
+      }, 0);
+      setTotalCryptoValue(total);
+    } else {
+      setTotalCryptoValue(0);
+    }
+  }, [user, cryptocurrencies]);
 
   if (!user) {
     return null;

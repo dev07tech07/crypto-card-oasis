@@ -16,7 +16,8 @@ export function CryptoProvider({ children }: { children: React.ReactNode }) {
     setTransactions,
     setWatchlist,
     addToWatchlist,
-    removeFromWatchlist
+    removeFromWatchlist,
+    loadSavedTransactions
   } = useCryptoOperations();
 
   const {
@@ -37,7 +38,8 @@ export function CryptoProvider({ children }: { children: React.ReactNode }) {
     getUserTransactions,
     addToWatchlist,
     removeFromWatchlist,
-    watchlist
+    watchlist,
+    loadSavedTransactions
   };
 
   return <CryptoContext.Provider value={value}>{children}</CryptoContext.Provider>;

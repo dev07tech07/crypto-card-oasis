@@ -53,4 +53,5 @@ export interface CryptoContextType {
   addToWatchlist: (cryptoId: string) => void;
   removeFromWatchlist: (cryptoId: string) => void;
   watchlist: string[];
+  loadSavedTransactions: () => void;
 }

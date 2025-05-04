@@ -19,13 +19,18 @@ export const useCryptoOperations = () => {
       const storedUser = localStorage.getItem('cryptoUser');
       if (storedUser) {
         try {
-          setUser(JSON.parse(storedUser));
+          const refreshedUser = JSON.parse(storedUser);
+          setUser(refreshedUser);
+          console.log('Refreshed user data:', refreshedUser);
         } catch (error) {
           console.error('Failed to parse user data', error);
         }
       }
     }
-  }, [transactions, setUser, user]);
+    
+    // Reload transactions whenever user or transactions change
+    loadSavedTransactions();
+  }, [setUser, user, loadSavedTransactions]);
 
   return {
     cryptocurrencies,
@@ -36,6 +41,7 @@ export const useCryptoOperations = () => {
     setTransactions,
     setWatchlist,
     addToWatchlist,
-    removeFromWatchlist
+    removeFromWatchlist,
+    loadSavedTransactions
   };
 };
