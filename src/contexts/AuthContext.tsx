@@ -1,6 +1,6 @@
-
 import React, { createContext, useState, useContext } from 'react';
 import { User, AuthContextType } from '../types/auth';
+import { handleLogout } from '../services/authService';
 
 // Create a mock user that will always be "logged in"
 const mockUser: User = {
@@ -69,19 +69,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const logout = () => {
-    // API call would go here
-    /* 
-    Example API call:
-    try {
-      await fetch('/api/auth/logout', {
-        method: 'POST',
-      });
-    } catch (error) {
-      console.error('Logout error:', error);
-    }
-    */
-    // We don't actually log out in the demo mode
-    console.log('Logout called but ignored in demo mode');
+    // Use the authService logout function
+    handleLogout(setUser);
   };
 
   const value = {

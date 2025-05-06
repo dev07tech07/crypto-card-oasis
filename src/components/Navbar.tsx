@@ -11,7 +11,9 @@ const Navbar: React.FC = () => {
   const navigate = useNavigate();
 
   const handleLogout = () => {
+    // Call the logout function
     logout();
+    // Then navigate to the home page
     navigate('/');
   };
 
@@ -48,6 +50,7 @@ const Navbar: React.FC = () => {
                 size="icon" 
                 onClick={handleLogout} 
                 className="text-muted-foreground hover:text-white"
+                aria-label="Logout"
               >
                 <LogOut size={18} />
               </Button>
